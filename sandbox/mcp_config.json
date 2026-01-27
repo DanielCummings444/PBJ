@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "pbip-analyzer": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "-f", "sandbox/docker-compose.yml",
+        "run", "--rm", "-i",
+        "pbip-analyzer",
+        "python", "-m", "pbip_analyzer.server"
+      ],
+      "env": {}
+    }
+  }
+}

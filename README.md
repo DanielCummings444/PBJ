@@ -98,13 +98,113 @@ CPU and memory limits can be adjusted in `docker-compose.yml` under `deploy.reso
 
 ```
 PBJ/
-├── Dockerfile           # Image definition with all CLI tools
-├── docker-compose.yml   # Container orchestration config
-├── cli-vm.sh            # Management script (build/start/shell/exec/etc.)
+├── Dockerfile           # CLI-VM image definition
+├── docker-compose.yml   # CLI-VM container config
+├── cli-vm.sh            # CLI-VM management script
 ├── scripts/
 │   ├── entrypoint.sh    # Container entrypoint with welcome banner
 │   └── toolbox.sh       # Lists all installed CLI tools
 ├── workspace/           # Shared directory (host <-> VM)
+├── sandbox/             # PBIP Analyzer MCP tool (see below)
 ├── .dockerignore
 └── .gitignore
+```
+
+---
+
+## PBIP Analyzer (MCP Tool)
+
+The `sandbox/` directory contains a Power BI Project (PBIP) analysis tool
+exposed as an MCP server. It parses `.pbip` projects (model.bim, TMDL,
+and PBIR report formats), runs static analysis, and produces:
+
+- **Quantitative findings** (JSON or formatted text)
+- **Whitepaper-style reports** (Markdown) with executive summary,
+  methodology, detailed findings, and a prioritized action plan
+
+### Quick Start
+
+```bash
+cd sandbox
+
+# Build the Docker image
+./run.sh build
+
+# Analyze the included sample project
+./run.sh sample
+
+# Analyze your own PBIP project
+./run.sh analyze /data/projects/MyProject
+```
+
+### MCP Integration
+
+To use as an MCP tool with Claude Desktop or any MCP client, add
+`sandbox/mcp_config.json` to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "pbip-analyzer": {
+      "command": "docker",
+      "args": [
+        "compose", "-f", "sandbox/docker-compose.yml",
+        "run", "--rm", "-i", "pbip-analyzer",
+        "python", "-m", "pbip_analyzer.server"
+      ]
+    }
+  }
+}
+```
+
+### MCP Tools Exposed
+
+| Tool | Description |
+|------|-------------|
+| `analyze_pbip` | Full analysis returning quantitative findings (JSON or text) |
+| `analyze_pbip_report` | Full analysis returning a whitepaper-style Markdown report |
+| `list_pbip_metrics` | Quick metrics-only scan (no detailed findings) |
+
+### What Is Analyzed
+
+| Area | Checks |
+|------|--------|
+| **Model Structure** | Table count, column count, calculated columns, documentation coverage, orphan tables |
+| **DAX Quality** | Expression length, nesting depth, iterator usage, deprecated functions, missing VARs, format strings |
+| **Relationships** | Bi-directional filters, many-to-many, inactive, circular paths, duplicate paths |
+| **Report Design** | Page count, visual density, visual types, overlapping visuals |
+| **Performance** | Storage modes, composite models, nested iterators, overall risk score |
+
+### Sandbox Structure
+
+```
+sandbox/
+├── Dockerfile                    # Python 3.12 slim image
+├── docker-compose.yml            # Container config with volume mounts
+├── run.sh                        # Management script
+├── mcp_config.json               # MCP client configuration
+├── requirements.txt
+├── pyproject.toml
+├── pbip_analyzer/
+│   ├── server.py                 # MCP server (stdio)
+│   ├── cli.py                    # Standalone CLI
+│   ├── parsers/
+│   │   ├── pbip_parser.py        # Project discovery & dispatch
+│   │   ├── model_bim_parser.py   # model.bim (TMSL JSON) parser
+│   │   ├── tmdl_parser.py        # TMDL format parser
+│   │   └── report_parser.py      # PBIR/PBIR-Legacy parser
+│   ├── analyzers/
+│   │   ├── model_analyzer.py     # Schema & model structure
+│   │   ├── dax_analyzer.py       # DAX expression quality
+│   │   ├── relationship_analyzer.py  # Relationship design
+│   │   ├── report_analyzer.py    # Report layout & UX
+│   │   └── performance_analyzer.py   # Cross-cutting performance
+│   ├── reporters/
+│   │   ├── quantitative.py       # JSON/text metrics output
+│   │   └── whitepaper.py         # Markdown whitepaper generator
+│   └── models/
+│       └── findings.py           # Data models (Finding, Metric, etc.)
+├── samples/                      # Sample AdventureWorks PBIP project
+├── projects/                     # Mount your PBIP projects here
+└── reports/                      # Generated reports output
 ```
