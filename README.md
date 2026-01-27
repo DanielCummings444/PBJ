@@ -208,3 +208,44 @@ sandbox/
 ├── projects/                     # Mount your PBIP projects here
 └── reports/                      # Generated reports output
 ```
+
+---
+
+## GitHub Pages Upload Portal
+
+A web interface hosted on GitHub Pages lets you upload PBIP folders and
+download generated whitepaper reports — no CLI or Docker required.
+
+### How It Works
+
+1. **Upload** — Select your PBIP project folder through the web UI.
+   Files are committed to `sandbox/projects/` via the GitHub API.
+2. **Analyze** — A GitHub Actions workflow triggers automatically,
+   runs the PBIP analyzer, and generates whitepaper + JSON + text reports.
+3. **Download** — Reports appear in the portal. View them inline or
+   download the Markdown/JSON files.
+
+### Setup
+
+1. Enable GitHub Pages for the repo:
+   - Go to **Settings > Pages**
+   - Source: **Deploy from a branch**
+   - Branch: `main` (or your default), folder: `/docs`
+   - Save
+
+2. Generate a Personal Access Token:
+   - Go to [github.com/settings/tokens](https://github.com/settings/tokens/new?scopes=repo,workflow)
+   - Scopes needed: `repo`, `workflow`
+
+3. Open the GitHub Pages URL (`https://<owner>.github.io/PBJ/`) and
+   enter your token, repo owner, repo name, and branch.
+
+### Portal Features
+
+- Drag-and-drop or browse to select a PBIP project folder
+- All files committed in a single atomic commit (Git tree API)
+- Automatic project name detection
+- Real-time upload progress bar
+- Report listing with View and Download buttons
+- Activity log for troubleshooting
+- Settings persisted in localStorage

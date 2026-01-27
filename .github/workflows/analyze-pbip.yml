@@ -1,0 +1,103 @@
+name: Analyze PBIP Project
+
+on:
+  push:
+    paths:
+      - "sandbox/projects/**"
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      project_name:
+        description: "Name of the project folder under sandbox/projects/"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        working-directory: sandbox
+        run: |
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Detect changed projects
+        id: detect
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "projects=${{ inputs.project_name }}" >> "$GITHUB_OUTPUT"
+          else
+            # Find project folders that were changed in this push
+            PROJECTS=$(git diff --name-only HEAD~1 HEAD -- sandbox/projects/ \
+              | sed -n 's|^sandbox/projects/\([^/]*\)/.*|\1|p' \
+              | sort -u \
+              | tr '\n' ',' \
+              | sed 's/,$//')
+            echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run PBIP analysis
+        if: steps.detect.outputs.projects != ''
+        working-directory: sandbox
+        run: |
+          IFS=',' read -ra PROJECT_ARRAY <<< "${{ steps.detect.outputs.projects }}"
+          for PROJECT in "${PROJECT_ARRAY[@]}"; do
+            PROJECT=$(echo "$PROJECT" | xargs)  # trim whitespace
+            if [ -z "$PROJECT" ]; then continue; fi
+
+            PROJECT_DIR="projects/${PROJECT}"
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "::warning::Project directory not found: $PROJECT_DIR"
+              continue
+            fi
+
+            echo "========================================"
+            echo "Analyzing: ${PROJECT}"
+            echo "========================================"
+
+            TIMESTAMP=$(date -u +%Y%m%d-%H%M%S)
+
+            # Whitepaper report
+            python -m pbip_analyzer.cli "$PROJECT_DIR" \
+              --format whitepaper \
+              --output "reports/${PROJECT}-whitepaper-${TIMESTAMP}.md"
+
+            # JSON report
+            python -m pbip_analyzer.cli "$PROJECT_DIR" \
+              --format json \
+              --output "reports/${PROJECT}-quantitative-${TIMESTAMP}.json"
+
+            # Text summary
+            python -m pbip_analyzer.cli "$PROJECT_DIR" \
+              --format text \
+              --output "reports/${PROJECT}-summary-${TIMESTAMP}.txt"
+
+            echo "Reports generated for ${PROJECT}"
+          done
+
+      - name: Commit reports
+        if: steps.detect.outputs.projects != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add sandbox/reports/
+          if git diff --cached --quiet; then
+            echo "No new reports to commit."
+          else
+            git commit -m "Add analysis reports for: ${{ steps.detect.outputs.projects }}"
+            git push
+          fi
