@@ -53,7 +53,7 @@ readonly OPENCLAW_HOME="${ZEABUR_DATA}/openclaw"
 
 # Tool versions
 readonly GO_VERSION="1.22.5"
-readonly NODE_VERSION="20"
+readonly NODE_VERSION="22"
 readonly GHIDRA_VERSION="11.1.2"
 readonly GHIDRA_DATE="20240709"
 readonly TERRAFORM_VERSION="1.9.0"

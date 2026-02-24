@@ -86,6 +86,8 @@ fi
 
 # ── 5. Generate OpenClaw config from env vars ───────────────
 echo "[entrypoint] Running configure.js..."
+export OPENCLAW_CONFIG_PATH="/data/.openclaw/config.json"
+export OPENCLAW_STATE_DIR="/data/.openclaw"
 node /opt/kali-openclaw/configure.js
 
 # ── 6. Set up nginx basic auth ──────────────────────────────
@@ -126,7 +128,6 @@ echo ""
 
 # ── 10. Start OpenClaw gateway (foreground) ─────────────────
 echo "[entrypoint] Starting OpenClaw gateway on :18789..."
-exec openclaw-gateway \
-    --config /data/.openclaw/config.json \
-    --host 0.0.0.0 \
-    --port 18789
+export OPENCLAW_CONFIG_PATH="/data/.openclaw/config.json"
+export OPENCLAW_STATE_DIR="/data/.openclaw"
+exec openclaw gateway --port 18789 --verbose
