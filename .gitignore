@@ -1,0 +1,21 @@
+# Environment variables
+.env
+
+# Data directory
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+
+# Docker
+*.log
