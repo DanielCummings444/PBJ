@@ -1,9 +1,9 @@
 version: "3.8"
 
 services:
-  kali-openclaw:
+  openclaw-toolkit:
     build: .
-    container_name: kali-openclaw
+    container_name: openclaw-toolkit
     restart: unless-stopped
     ports:
       - "${PORT:-8080}:8080"

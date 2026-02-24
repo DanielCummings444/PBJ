@@ -1,15 +1,15 @@
 apiVersion: zeabur.com/v1
 kind: Template
 metadata:
-  name: kali-openclaw
-  description: OpenClaw AI assistant running on Kali Linux
+  name: openclaw-toolkit
+  description: OpenClaw AI assistant on Kali Linux with 232+ quant, hacker, and OSINT tools pre-installed
 spec:
   services:
-    - name: kali-openclaw
+    - name: openclaw-toolkit
       icon: https://www.kali.org/images/kali-logo.svg
       source:
         type: GITHUB
-        repo: YOUR_GITHUB_USERNAME/kali-openclaw
+        repo: DanielCummings444/PBJ
         branch: main
       build:
         type: DOCKERFILE
@@ -21,24 +21,10 @@ spec:
         - id: openclaw-data
           dir: /data
       env:
+        # ── AI Providers (at least one required) ──
         ANTHROPIC_API_KEY:
-          description: "Anthropic API key for Claude"
+          description: "Anthropic API key for Claude (highest priority)"
           required: true
-        AUTH_PASSWORD:
-          description: "Password for web UI login"
-          required: true
-        AUTH_USERNAME:
-          description: "Username for web UI login"
-          default: "admin"
-        PORT:
-          description: "External port"
-          default: "8080"
-        OPENCLAW_DOCKER_APT_PACKAGES:
-          description: "Space-separated apt packages to install at startup"
-          default: ""
-        OPENCLAW_PRIMARY_MODEL:
-          description: "Override the primary AI model"
-          default: ""
         OPENAI_API_KEY:
           description: "OpenAI API key"
           default: ""
@@ -57,9 +43,116 @@ spec:
         MISTRAL_API_KEY:
           description: "Mistral API key"
           default: ""
+
+        # ── Auth & Gateway ──
+        AUTH_PASSWORD:
+          description: "Password for web UI login"
+          required: true
+        AUTH_USERNAME:
+          description: "Username for web UI login"
+          default: "admin"
+        PORT:
+          description: "External port"
+          default: "8080"
+        OPENCLAW_PRIMARY_MODEL:
+          description: "Override the primary AI model"
+          default: ""
+        OPENCLAW_DOCKER_APT_PACKAGES:
+          description: "Space-separated extra apt packages to install at startup"
+          default: ""
+
+        # ── Trading & Market Data ──
+        ALPACA_API_KEY:
+          description: "Alpaca trading API key"
+          default: ""
+        ALPACA_SECRET_KEY:
+          description: "Alpaca trading secret key"
+          default: ""
+        ALPACA_BASE_URL:
+          description: "Alpaca API base URL (paper or live)"
+          default: "https://paper-api.alpaca.markets"
+        BINANCE_API_KEY:
+          description: "Binance API key"
+          default: ""
+        BINANCE_SECRET_KEY:
+          description: "Binance secret key"
+          default: ""
+        OKX_API_KEY:
+          description: "OKX API key"
+          default: ""
+        OKX_SECRET_KEY:
+          description: "OKX secret key"
+          default: ""
+        OKX_PASSPHRASE:
+          description: "OKX passphrase"
+          default: ""
+        POLYGON_API_KEY:
+          description: "Polygon.io API key"
+          default: ""
+
+        # ── OSINT & Recon ──
+        SHODAN_API_KEY:
+          description: "Shodan API key"
+          default: ""
+        CENSYS_API_ID:
+          description: "Censys API ID"
+          default: ""
+        CENSYS_API_SECRET:
+          description: "Censys API secret"
+          default: ""
+        VT_API_KEY:
+          description: "VirusTotal API key"
+          default: ""
+
+        # ── Social Media ──
+        REDDIT_CLIENT_ID:
+          description: "Reddit app client ID"
+          default: ""
+        REDDIT_CLIENT_SECRET:
+          description: "Reddit app client secret"
+          default: ""
+        TWITTER_BEARER_TOKEN:
+          description: "Twitter/X bearer token"
+          default: ""
+
+        # ── Blockchain ──
+        INFURA_PROJECT_ID:
+          description: "Infura project ID"
+          default: ""
+        ALCHEMY_API_KEY:
+          description: "Alchemy API key"
+          default: ""
+        ETHERSCAN_API_KEY:
+          description: "Etherscan API key"
+          default: ""
+        DUNE_API_KEY:
+          description: "Dune Analytics API key"
+          default: ""
+
+        # ── Cloud ──
+        AWS_ACCESS_KEY_ID:
+          description: "AWS access key ID"
+          default: ""
+        AWS_SECRET_ACCESS_KEY:
+          description: "AWS secret access key"
+          default: ""
+        AWS_DEFAULT_REGION:
+          description: "AWS default region"
+          default: "us-east-1"
+
+        # ── Notifications ──
         TELEGRAM_BOT_TOKEN:
-          description: "Telegram bot token"
+          description: "Telegram bot token from @BotFather"
+          default: ""
+        TELEGRAM_CHAT_ID:
+          description: "Telegram chat ID for notifications"
           default: ""
         DISCORD_BOT_TOKEN:
           description: "Discord bot token"
+          default: ""
+        DISCORD_WEBHOOK_URL:
+          description: "Discord webhook URL for notifications"
+          default: ""
+        SLACK_WEBHOOK_URL:
+          description: "Slack webhook URL for notifications"
           default: ""
