@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  kali-openclaw:
+    build: .
+    container_name: kali-openclaw
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    env_file:
+      - .env
+    volumes:
+      - openclaw-data:/data
+    # Allow host networking for Ollama access
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  openclaw-data:

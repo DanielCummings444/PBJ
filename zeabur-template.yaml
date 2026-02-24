@@ -1,0 +1,65 @@
+apiVersion: zeabur.com/v1
+kind: Template
+metadata:
+  name: kali-openclaw
+  description: OpenClaw AI assistant running on Kali Linux
+spec:
+  services:
+    - name: kali-openclaw
+      icon: https://www.kali.org/images/kali-logo.svg
+      source:
+        type: GITHUB
+        repo: YOUR_GITHUB_USERNAME/kali-openclaw
+        branch: main
+      build:
+        type: DOCKERFILE
+        dockerfilePath: ./Dockerfile
+      ports:
+        - port: 8080
+          type: HTTP
+      volumes:
+        - id: openclaw-data
+          dir: /data
+      env:
+        ANTHROPIC_API_KEY:
+          description: "Anthropic API key for Claude"
+          required: true
+        AUTH_PASSWORD:
+          description: "Password for web UI login"
+          required: true
+        AUTH_USERNAME:
+          description: "Username for web UI login"
+          default: "admin"
+        PORT:
+          description: "External port"
+          default: "8080"
+        OPENCLAW_DOCKER_APT_PACKAGES:
+          description: "Space-separated apt packages to install at startup"
+          default: ""
+        OPENCLAW_PRIMARY_MODEL:
+          description: "Override the primary AI model"
+          default: ""
+        OPENAI_API_KEY:
+          description: "OpenAI API key"
+          default: ""
+        OPENROUTER_API_KEY:
+          description: "OpenRouter API key"
+          default: ""
+        GEMINI_API_KEY:
+          description: "Google Gemini API key"
+          default: ""
+        XAI_API_KEY:
+          description: "xAI (Grok) API key"
+          default: ""
+        GROQ_API_KEY:
+          description: "Groq API key"
+          default: ""
+        MISTRAL_API_KEY:
+          description: "Mistral API key"
+          default: ""
+        TELEGRAM_BOT_TOKEN:
+          description: "Telegram bot token"
+          default: ""
+        DISCORD_BOT_TOKEN:
+          description: "Discord bot token"
+          default: ""
